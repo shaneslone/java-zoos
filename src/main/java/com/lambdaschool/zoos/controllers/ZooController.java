@@ -34,12 +34,33 @@ public class ZooController {
     @PostMapping(value = "/zoo", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> addZoo(@Valid @RequestBody Zoo newZoo){
         newZoo.setZooid(0);
-        newZoo = zooServices.save(newZoo);
+        zooServices.save(newZoo);
 
         HttpHeaders responseHeaders = new HttpHeaders();
         URI newZooURI = ServletUriComponentsBuilder.fromCurrentRequest().path("/{zooid}").buildAndExpand(newZoo.getZooid()).toUri();
         responseHeaders.setLocation(newZooURI);
 
-        return new ResponseEntity<>(newZoo, responseHeaders, HttpStatus.CREATED);
+        return new ResponseEntity<>(responseHeaders, HttpStatus.CREATED);
     }
+
+    @PutMapping(value = "/zoo/{zooid}", consumes = "application/json")
+    public ResponseEntity<?> updateZooById(@PathVariable long zooid, @Valid @RequestBody Zoo updatedZoo){
+        updatedZoo.setZooid(zooid);
+        zooServices.save(updatedZoo);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping(value = "/zoo/{zooid}", consumes = "application/json")
+    public ResponseEntity<?> patchZooById(@PathVariable long zooid, @RequestBody Zoo updateZoo){
+        zooServices.update(updateZoo, zooid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/zoo/{zooid}")
+    public ResponseEntity<?> deleteZooById(@PathVariable long zooid){
+        zooServices.delete(zooid);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
 }

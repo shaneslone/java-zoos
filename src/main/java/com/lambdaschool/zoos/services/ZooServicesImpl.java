@@ -73,4 +73,39 @@ public class ZooServicesImpl implements ZooServices{
 
         return zoorepos.save(newZoo);
     }
+
+    @Override
+    public void delete(long id) {
+        zoorepos.deleteById(id);
+    }
+
+    @Override
+    public void update(Zoo zoo, long zooid) {
+        Zoo updateZoo = zoorepos.findById(zooid)
+                .orElseThrow(() -> new EntityNotFoundException("Zoo " + zooid + " not found!"));
+
+        if(zoo.getZooname() != null)updateZoo.setZooname(zoo.getZooname());
+
+        if(zoo.getTelephones().size() > 0){
+            for(Telephone t : zoo.getTelephones())
+            {
+                Telephone newPhone = new Telephone();
+                newPhone.setPhonenumber(t.getPhonenumber());
+                newPhone.setPhonetype(t.getPhonetype());
+                newPhone.setZoo(updateZoo);
+                updateZoo.getTelephones().add(newPhone);
+            }
+        }
+
+        if(zoo.getAnimals().size() > 0){
+            for(ZooAnimals z : zoo.getAnimals()){
+                Animal newAnimal = animalrepos.findById(z.getAnimal().getAnimalid())
+                        .orElseThrow(() -> new EntityNotFoundException("Animal " + z.getAnimal().getAnimalid() + " not found!"));
+                ZooAnimals newZooAnimal = new ZooAnimals(updateZoo, newAnimal, z.getIncomingzoo());
+                updateZoo.getAnimals().add(newZooAnimal);
+            }
+        }
+
+        zoorepos.save(updateZoo);
+    }
 }
